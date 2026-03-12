@@ -4,11 +4,25 @@ import redis from "../../../packages/redis/src";
 import { generateId, sleep } from "../../../packages/utils/src";
 import { renewLeader } from "./leader";
 
+async function pushToRedis(payload: any, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await redis.lpush("job-queue", JSON.stringify(payload));
+      return;
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      await sleep(500);
+    }
+  }
+}
+
 export async function runScheduler() {
   console.log("Scheduler loop started");
 
   while (true) {
     try {
+      await query("BEGIN");
+
       const jobs = await query(`
         SELECT *
         FROM jobs
@@ -17,7 +31,8 @@ export async function runScheduler() {
         FOR UPDATE SKIP LOCKED
         LIMIT 20
       `);
-      console.log("Jobs fetched:", jobs.rows.length);
+
+      const queuedExecutions: any[] = [];
 
       for (const job of jobs.rows) {
         const executionId = generateId();
@@ -28,22 +43,6 @@ export async function runScheduler() {
            VALUES ($1,$2,$3,$4)`,
           [executionId, job.id, "queued", 0],
         );
-
-        try {
-          const pushResult = await redis.lpush(
-            "job-queue",
-            JSON.stringify({
-              executionId,
-              jobId: job.id,
-              payload: job.payload,
-              retry: job.retry_count,
-              timeout: job.timeout,
-            }),
-          );
-          console.log("📤 Pushed to Redis, queue length:", pushResult);
-        } catch (redisErr) {
-          console.error("❌ Redis push failed:", redisErr);
-        }
 
         const interval = parseExpression(job.cron_expression, {
           currentDate: new Date(),
@@ -59,11 +58,30 @@ export async function runScheduler() {
           [nextRun, job.id],
         );
 
-        console.log("Job queued:", job.name);
+        queuedExecutions.push({
+          executionId,
+          jobId: job.id,
+          payload: job.payload,
+          retry: job.retry_count,
+          timeout: job.timeout,
+        });
+      }
+
+      await query("COMMIT");
+
+      // Push to Redis AFTER commit
+      for (const payload of queuedExecutions) {
+        try {
+          await pushToRedis(payload);
+          console.log("📤 Job queued:", payload.jobId);
+        } catch (err) {
+          console.error("❌ Redis push failed:", err);
+        }
       }
 
       await renewLeader();
     } catch (err) {
+      await query("ROLLBACK");
       console.error("scheduler error", err);
     }
 
