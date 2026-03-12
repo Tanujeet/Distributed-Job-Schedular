@@ -3,7 +3,7 @@ import redis from "../../../packages/redis/src";
 import { randomUUID } from "crypto";
 
 const workerId = randomUUID();
-console.log("REDIS_URL:", process.env.REDIS_URL);
+
 async function heartbeat() {
   await redis.set(
     `worker:${workerId}`,
