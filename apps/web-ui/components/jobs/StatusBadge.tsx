@@ -55,9 +55,9 @@ export function StatusBadge({ status }: { status?: JobStatus }) {
   return (
     <Badge
       variant="outline"
-      className={`gap-1.5 font-medium border ${config.color}`}
+      className={`gap-1.5 font-medium border whitespace-nowrap ${config.color}`}
     >
-      <Icon className="w-3.5 h-3.5" />
+      <Icon className="w-3.5 h-3.5 shrink-0" />
       {config.label}
     </Badge>
   );

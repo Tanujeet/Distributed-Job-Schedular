@@ -16,16 +16,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // 'dark' class defaults the whole app to dark mode
     <html lang="en" className="dark">
       <body
         className={`${inter.className} bg-zinc-950 text-zinc-50 antialiased flex min-h-screen`}
       >
-        {/* Fixed Sidebar */}
         <Sidebar />
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        {/* On mobile, sidebar is likely full-width top nav or hidden — 
+            ml-0 on mobile, then offset by sidebar width on md+ */}
+        <main className="flex-1 overflow-y-auto min-w-0 md:ml-0">
+          {children}
+        </main>
       </body>
     </html>
   );

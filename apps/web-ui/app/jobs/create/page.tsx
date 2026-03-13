@@ -1,7 +1,6 @@
-// app/jobs/create/page.tsx
 "use client";
 
-import { useRouter } from "next/navigation"; // ← add
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,7 +28,7 @@ const formSchema = z.object({
 type JobFormValues = z.infer<typeof formSchema>;
 
 export default function CreateJobPage() {
-  const router = useRouter(); // ← add
+  const router = useRouter();
 
   const {
     register,
@@ -60,32 +59,30 @@ export default function CreateJobPage() {
 
       if (!res.ok) throw new Error("Failed to create job");
 
-      router.push("/jobs"); // ← add
+      router.push("/jobs");
     } catch (err) {
       console.error("Failed to create job", err);
     }
   };
 
-  // rest of JSX same — no changes needed below
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-3xl mx-auto p-8 text-zinc-50"
+      className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 text-zinc-50"
     >
-      <div className="mb-8 border-b border-zinc-800 pb-6">
-        <h1 className="text-3xl font-semibold flex items-center gap-3">
-          <Terminal className="text-zinc-400" /> Create New Job
+      <div className="mb-6 sm:mb-8 border-b border-zinc-800 pb-5 sm:pb-6">
+        <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-3">
+          <Terminal className="text-zinc-400 w-6 h-6 sm:w-7 sm:h-7 shrink-0" />
+          Create New Job
         </h1>
       </div>
 
-      {/* Pure Native Form */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-6 bg-zinc-950 p-6 rounded-lg border border-zinc-800"
+        className="space-y-5 sm:space-y-6 bg-zinc-950 p-4 sm:p-6 rounded-lg border border-zinc-800"
       >
-        {/* Job Name Field */}
+        {/* Job Name */}
         <div className="space-y-2">
           <Label htmlFor="name" className="text-zinc-200">
             Job Name
@@ -98,13 +95,13 @@ export default function CreateJobPage() {
           />
           {errors.name && (
             <p className="text-rose-500 text-sm flex items-center gap-1 mt-1">
-              <AlertCircle className="w-4 h-4" /> {errors.name.message}
+              <AlertCircle className="w-4 h-4 shrink-0" /> {errors.name.message}
             </p>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          {/* Cron Field */}
+        {/* Cron + Retries — stacked on mobile, side-by-side on sm+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-2">
             <Label htmlFor="cron" className="text-zinc-200">
               Cron Expression
@@ -117,12 +114,12 @@ export default function CreateJobPage() {
             />
             {errors.cron && (
               <p className="text-rose-500 text-sm flex items-center gap-1 mt-1">
-                <AlertCircle className="w-4 h-4" /> {errors.cron.message}
+                <AlertCircle className="w-4 h-4 shrink-0" />{" "}
+                {errors.cron.message}
               </p>
             )}
           </div>
 
-          {/* Retry Count Field */}
           <div className="space-y-2">
             <Label htmlFor="retryCount" className="text-zinc-200">
               Retries
@@ -137,13 +134,14 @@ export default function CreateJobPage() {
             />
             {errors.retryCount && (
               <p className="text-rose-500 text-sm flex items-center gap-1 mt-1">
-                <AlertCircle className="w-4 h-4" /> {errors.retryCount.message}
+                <AlertCircle className="w-4 h-4 shrink-0" />{" "}
+                {errors.retryCount.message}
               </p>
             )}
           </div>
         </div>
 
-        {/* Payload Field */}
+        {/* Payload */}
         <div className="space-y-2">
           <Label htmlFor="payload" className="text-zinc-200">
             JSON Payload
@@ -156,12 +154,12 @@ export default function CreateJobPage() {
           />
           {errors.payload && (
             <p className="text-rose-500 text-sm flex items-center gap-1 mt-1">
-              <AlertCircle className="w-4 h-4" /> {errors.payload.message}
+              <AlertCircle className="w-4 h-4 shrink-0" />{" "}
+              {errors.payload.message}
             </p>
           )}
         </div>
 
-        {/* Submit Button */}
         <Button
           type="submit"
           className="bg-emerald-600 hover:bg-emerald-500 text-white w-full transition-colors"

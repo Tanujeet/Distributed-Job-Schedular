@@ -1,4 +1,3 @@
-// components/shared/AnimatedStatCard.tsx
 "use client";
 
 import { motion } from "framer-motion";
@@ -24,10 +23,12 @@ export function AnimatedStatCard({ title, value, icon, trend }: Props) {
           <CardTitle className="text-sm font-medium text-zinc-400">
             {title}
           </CardTitle>
-          <div className="text-zinc-500">{icon}</div>
+          <div className="text-zinc-500 shrink-0">{icon}</div>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-zinc-100">{value}</div>
+          <div className="text-2xl sm:text-3xl font-bold text-zinc-100 tabular-nums">
+            {value}
+          </div>
           {trend && <p className="text-xs text-zinc-500 mt-1">{trend}</p>}
         </CardContent>
       </Card>

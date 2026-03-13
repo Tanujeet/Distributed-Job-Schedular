@@ -86,7 +86,6 @@ export function JobTable({ jobs: initialJobs }: { jobs: Job[] }) {
     setLoadingId(id);
     try {
       await deleteJob(id);
-      // Remove from list after soft-delete
       setJobs((prev) => prev.filter((j) => j.id !== id));
       router.refresh();
     } catch (err) {
@@ -97,14 +96,19 @@ export function JobTable({ jobs: initialJobs }: { jobs: Job[] }) {
   };
 
   return (
-    <div className="rounded-md border border-zinc-800 bg-zinc-950/50">
-      <Table>
+    <div className="rounded-md border border-zinc-800 bg-zinc-950/50 overflow-x-auto">
+      <Table className="min-w-[600px]">
         <TableHeader>
           <TableRow className="border-zinc-800 hover:bg-transparent">
             <TableHead className="text-zinc-400">Job Name</TableHead>
             <TableHead className="text-zinc-400">Status</TableHead>
-            <TableHead className="text-zinc-400">Cron</TableHead>
-            <TableHead className="text-zinc-400">Last Run</TableHead>
+            {/* Hidden on mobile, visible from md up */}
+            <TableHead className="text-zinc-400 hidden md:table-cell">
+              Cron
+            </TableHead>
+            <TableHead className="text-zinc-400 hidden sm:table-cell">
+              Last Run
+            </TableHead>
             <TableHead className="text-zinc-400 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -127,25 +131,29 @@ export function JobTable({ jobs: initialJobs }: { jobs: Job[] }) {
                   >
                     {job.name}
                   </Link>
+                  {/* Show cron inline on mobile when column is hidden */}
+                  <span className="block md:hidden font-mono text-xs text-zinc-500 mt-0.5">
+                    {job.cron}
+                  </span>
                 </TableCell>
 
                 <TableCell>
                   <StatusBadge status={job.status} />
                 </TableCell>
 
-                <TableCell className="font-mono text-xs text-zinc-400 bg-zinc-900 px-2 py-1 rounded w-fit inline-block mt-2">
+                <TableCell className="hidden md:table-cell font-mono text-xs text-zinc-400 bg-zinc-900 px-2 py-1 rounded w-fit">
                   {job.cron}
                 </TableCell>
 
-                <TableCell className="text-zinc-500 text-sm">
+                <TableCell className="hidden sm:table-cell text-zinc-500 text-sm whitespace-nowrap">
                   {job.lastRun
                     ? new Date(job.lastRun).toLocaleString()
                     : "Never"}
                 </TableCell>
 
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {/* Pause / Resume toggle */}
+                  {/* Always visible on touch (no hover on mobile), fade in on desktop hover */}
+                  <div className="flex justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 sm:transition-opacity">
                     {isPaused ? (
                       <Button
                         variant="ghost"
@@ -178,7 +186,6 @@ export function JobTable({ jobs: initialJobs }: { jobs: Job[] }) {
                       </Button>
                     )}
 
-                    {/* Delete with confirmation dialog */}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -191,7 +198,7 @@ export function JobTable({ jobs: initialJobs }: { jobs: Job[] }) {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+                      <AlertDialogContent className="bg-zinc-900 border-zinc-800 mx-4 sm:mx-auto">
                         <AlertDialogHeader>
                           <AlertDialogTitle className="text-zinc-100">
                             Delete "{job.name}"?
@@ -202,8 +209,8 @@ export function JobTable({ jobs: initialJobs }: { jobs: Job[] }) {
                             preserved.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700">
+                        <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                          <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 mt-0">
                             Cancel
                           </AlertDialogCancel>
                           <AlertDialogAction

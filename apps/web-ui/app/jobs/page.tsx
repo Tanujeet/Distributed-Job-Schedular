@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 
-
 import { JobTable } from "@/components/jobs/JobTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,7 @@ import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { getJobs } from "@/lib/services/jobs";
 import { Job } from "@/lib/types";
+
 export default async function JobsPage() {
   let jobs = [];
 
@@ -18,16 +18,18 @@ export default async function JobsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 p-8 max-w-7xl mx-auto w-full text-zinc-50">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full text-zinc-50">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800 pb-6">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">All Jobs</h1>
-          <p className="text-zinc-400 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+            All Jobs
+          </h1>
+          <p className="text-zinc-400 mt-1 text-sm sm:text-base">
             Manage, monitor, and configure all your scheduled tasks.
           </p>
         </div>
-        <Link href="/jobs/create">
-          <Button className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2">
+        <Link href="/jobs/create" className="w-full sm:w-auto">
+          <Button className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2 w-full sm:w-auto">
             <Plus className="w-4 h-4" />
             Create New Job
           </Button>
@@ -35,7 +37,7 @@ export default async function JobsPage() {
       </div>
 
       <div className="flex items-center gap-4 bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-1 sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           <Input
             placeholder="Search jobs by name or ID..."
@@ -44,7 +46,11 @@ export default async function JobsPage() {
         </div>
       </div>
 
-      <JobTable jobs={jobs} />
+      <div className="overflow-x-auto -mx-4 sm:mx-0">
+        <div className="min-w-full px-4 sm:px-0">
+          <JobTable jobs={jobs} />
+        </div>
+      </div>
     </div>
   );
 }
