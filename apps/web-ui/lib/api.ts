@@ -1,19 +1,19 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export async function fetchJobs() {
-  const res = await fetch(`${API_BASE}/api/jobs`, { cache: "no-store" });
+  const res = await fetch(`${API_BASE}/jobs`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch jobs");
   return res.json();
 }
 
 export async function fetchJob(id: string) {
-  const res = await fetch(`${API_BASE}/api/jobs/${id}`, { cache: "no-store" });
+  const res = await fetch(`${API_BASE}/jobs/${id}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch job");
   return res.json();
 }
 
 export async function fetchExecutions(id: string) {
-  const res = await fetch(`${API_BASE}/api/jobs/${id}/executions`, {
+  const res = await fetch(`${API_BASE}/jobs/${id}/executions`, {
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch executions");
@@ -21,7 +21,7 @@ export async function fetchExecutions(id: string) {
 }
 
 export async function pauseJobApi(id: string) {
-  const res = await fetch(`${API_BASE}/api/jobs/${id}/pause`, {
+  const res = await fetch(`${API_BASE}/jobs/${id}/pause`, {
     method: "PATCH",
   });
   if (!res.ok) throw new Error("Failed to pause job");
@@ -29,7 +29,7 @@ export async function pauseJobApi(id: string) {
 }
 
 export async function resumeJobApi(id: string) {
-  const res = await fetch(`${API_BASE}/api/jobs/${id}/resume`, {
+  const res = await fetch(`${API_BASE}/jobs/${id}/resume`, {
     method: "PATCH",
   });
   if (!res.ok) throw new Error("Failed to resume job");
@@ -37,7 +37,7 @@ export async function resumeJobApi(id: string) {
 }
 
 export async function deleteJobApi(id: string) {
-  const res = await fetch(`${API_BASE}/api/jobs/${id}`, {
+  const res = await fetch(`${API_BASE}/jobs/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) throw new Error("Failed to delete job");
