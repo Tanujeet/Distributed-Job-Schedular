@@ -1,15 +1,29 @@
-
-// components/jobs/StatusBadge.tsx
-
 import { Badge } from "@/components/ui/badge";
 import { JobStatus } from "@/lib/types";
-import { CheckCircle2, CircleDashed, XCircle, Clock } from "lucide-react";
+import {
+  CheckCircle2,
+  CircleDashed,
+  XCircle,
+  Clock,
+  PauseCircle,
+  Trash2,
+} from "lucide-react";
 
 const statusConfig = {
   active: {
     color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
     icon: CheckCircle2,
     label: "Active",
+  },
+  paused: {
+    color: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    icon: PauseCircle,
+    label: "Paused",
+  },
+  deleted: {
+    color: "bg-zinc-500/10 text-zinc-500 border-zinc-600/20",
+    icon: Trash2,
+    label: "Deleted",
   },
   success: {
     color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
@@ -32,12 +46,10 @@ const statusConfig = {
     label: "Pending",
   },
 };
+
 export function StatusBadge({ status }: { status?: JobStatus }) {
-
   const config =
-    statusConfig[status as keyof typeof statusConfig] ??
-    statusConfig.pending;
-
+    statusConfig[status as keyof typeof statusConfig] ?? statusConfig.pending;
   const Icon = config.icon;
 
   return (
@@ -50,4 +62,3 @@ export function StatusBadge({ status }: { status?: JobStatus }) {
     </Badge>
   );
 }
-

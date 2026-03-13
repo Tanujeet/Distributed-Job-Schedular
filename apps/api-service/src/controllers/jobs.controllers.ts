@@ -9,10 +9,9 @@ export const createJob = async (req: Request, res: Response) => {
 
     const id = generateId();
 
-    // compute first run
     const interval = parseExpression(cron_expression, {
       currentDate: new Date(),
-      tz:"UTC"
+      tz: "UTC",
     });
 
     const nextRun = interval.next().toDate();
@@ -42,7 +41,6 @@ export const createJob = async (req: Request, res: Response) => {
 export const getJob = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-
     const result = await query(`SELECT * FROM jobs WHERE id=$1`, [id]);
 
     if (!result.rows.length) {
@@ -62,18 +60,85 @@ export const getJobs = async (_: Request, res: Response) => {
 };
 
 export const deleteJob = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  await query(`DELETE FROM jobs WHERE id=$1`, [id]);
+    const result = await query(
+      `UPDATE jobs SET status='deleted', updated_at=NOW() WHERE id=$1 RETURNING id`,
+      [id],
+    );
 
-  res.json({ success: true });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    res.json({ success: true, message: "Job deleted" });
+  } catch (err) {
+    console.error("DELETE JOB ERROR:", err);
+    res.status(500).json({ error: "Failed to delete job" });
+  }
+};
+
+export const pauseJob = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const result = await query(
+      `UPDATE jobs SET status='paused', updated_at=NOW()
+       WHERE id=$1 AND status='active'
+       RETURNING id`,
+      [id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(400).json({ error: "Job not found or not active" });
+    }
+
+    res.json({ success: true, message: "Job paused" });
+  } catch (err) {
+    console.error("PAUSE JOB ERROR:", err);
+    res.status(500).json({ error: "Failed to pause job" });
+  }
+};
+
+export const resumeJob = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Recompute next_run_at from now when resuming
+    const jobResult = await query(
+      `SELECT cron_expression FROM jobs WHERE id=$1 AND status='paused'`,
+      [id],
+    );
+
+    if (!jobResult.rows.length) {
+      return res.status(400).json({ error: "Job not found or not paused" });
+    }
+
+    const { cron_expression } = jobResult.rows[0];
+    const interval = parseExpression(cron_expression, {
+      currentDate: new Date(),
+      tz: "UTC",
+    });
+    const nextRun = interval.next().toDate();
+
+    await query(
+      `UPDATE jobs SET status='active', next_run_at=$1, updated_at=NOW() WHERE id=$2`,
+      [nextRun, id],
+    );
+
+    res.json({ success: true, message: "Job resumed", next_run_at: nextRun });
+  } catch (err) {
+    console.error("RESUME JOB ERROR:", err);
+    res.status(500).json({ error: "Failed to resume job" });
+  }
 };
 
 export const getExecutions = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   const executions = await query(
-    `SELECT * FROM job_executions WHERE job_id=$1 ORDER BY started_at DESC`,
+    `SELECT * FROM job_executions WHERE job_id=$1 ORDER BY created_at DESC`,
     [id],
   );
 

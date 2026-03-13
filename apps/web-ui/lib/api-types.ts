@@ -1,5 +1,11 @@
-
-export type ApiJobStatus = "success" | "running" | "failed" | "pending";
+export type ApiJobStatus =
+  | "active"
+  | "paused"
+  | "deleted"
+  | "success"
+  | "running"
+  | "failed"
+  | "pending";
 
 export interface ApiJob {
   id: string;
@@ -9,6 +15,8 @@ export interface ApiJob {
   retry_count: number;
   timeout: number;
   status: ApiJobStatus;
+  next_run_at?: string;
+  last_run_at?: string | null;
   created_at?: string;
 }
 
@@ -21,4 +29,3 @@ export interface ApiExecution {
   status: ApiJobStatus;
   error_message?: string;
 }
-

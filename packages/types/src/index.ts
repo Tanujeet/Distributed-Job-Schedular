@@ -3,7 +3,7 @@ export interface Job {
   name: string;
   cron_expression: string;
   payload: any;
-  status: string;
+  status: "active" | "paused" | "deleted";
   retry_count: number;
   timeout: number;
   created_at: Date;

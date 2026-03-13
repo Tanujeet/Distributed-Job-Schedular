@@ -10,6 +10,23 @@ async function processJob(job: any) {
   const { executionId, jobId, payload, retry, timeout } = job;
 
   try {
+    // ✅ Guard: skip if job was paused or deleted after being queued
+    const jobCheck = await query(`SELECT status FROM jobs WHERE id=$1`, [
+      jobId,
+    ]);
+
+    if (!jobCheck.rows.length || jobCheck.rows[0].status !== "active") {
+      console.log(
+        `⏭️ Skipping execution ${executionId} — job is ${jobCheck.rows[0]?.status ?? "missing"}`,
+      );
+
+      await query(
+        `UPDATE job_executions SET status='cancelled', finished_at=NOW() WHERE id=$1`,
+        [executionId],
+      );
+      return;
+    }
+
     const result = await query(
       `UPDATE job_executions
        SET status='running', started_at=NOW()
@@ -31,9 +48,7 @@ async function processJob(job: any) {
     ]);
 
     await query(
-      `UPDATE job_executions
-       SET status='success', finished_at=NOW()
-       WHERE id=$1`,
+      `UPDATE job_executions SET status='success', finished_at=NOW() WHERE id=$1`,
       [executionId],
     );
 
@@ -65,11 +80,10 @@ async function workerLoop() {
 
   while (true) {
     try {
-
       const payload = await redis.rpop("job-queue");
 
       if (!payload) {
-        await new Promise((r) => setTimeout(r, 1000)); 
+        await new Promise((r) => setTimeout(r, 1000));
         continue;
       }
 
