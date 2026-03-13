@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { JobTable } from "@/components/jobs/JobTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
