@@ -17,15 +17,16 @@ router.get("/", async (req, res) => {
     const jobs = await pool.query(`
       SELECT id, name, cron_expression, status, last_run_at
       FROM jobs
+      WHERE status != 'deleted'
       ORDER BY created_at DESC
       LIMIT 10
     `);
 
     const stats = await pool.query(`
       SELECT
-        COUNT(*) as total,
-        COUNT(*) FILTER (WHERE status='active') as active,
-        COUNT(*) FILTER (WHERE status='failed') as failed
+      COUNT(*) FILTER (WHERE status != 'deleted') as total,
+      COUNT(*) FILTER (WHERE status = 'active') as active,
+      COUNT(*) FILTER (WHERE status = 'failed') as failed
       FROM jobs
     `);
 
