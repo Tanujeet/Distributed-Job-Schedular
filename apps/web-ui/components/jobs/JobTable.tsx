@@ -45,7 +45,9 @@ const item = {
 
 export function JobTable({ jobs: initialJobs }: { jobs: Job[] }) {
   const router = useRouter();
-  const [jobs, setJobs] = useState(initialJobs);
+  const [jobs, setJobs] = useState(
+    initialJobs.filter((j) => j.status !== "deleted"),
+  );
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const handlePause = async (id: string) => {

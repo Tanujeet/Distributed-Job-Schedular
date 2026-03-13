@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { getJobs } from "@/lib/services/jobs";
-
+import { Job } from "@/lib/types";
 export default async function JobsPage() {
   let jobs = [];
 
   try {
-    jobs = await getJobs();
+    jobs = (await getJobs()).filter((j: Job) => j.status !== "deleted");
   } catch (err) {
     console.error("Failed to load jobs:", err);
   }

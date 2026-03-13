@@ -1,12 +1,11 @@
 // app/jobs/create/page.tsx
 "use client";
 
+import { useRouter } from "next/navigation"; // ← add
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
-
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,12 +23,14 @@ const formSchema = z.object({
       return false;
     }
   }, "Must be valid JSON"),
- 
-  retryCount: z.number().min(0, "Cannot be negative").max(10, "Max 10 retries"),
+  retryCount: z.number().min(0).max(10),
 });
+
 type JobFormValues = z.infer<typeof formSchema>;
 
 export default function CreateJobPage() {
+  const router = useRouter(); // ← add
+
   const {
     register,
     handleSubmit,
@@ -44,28 +45,28 @@ export default function CreateJobPage() {
     },
   });
 
-const onSubmit = async (data: JobFormValues) => {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jobs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: data.name,
-        cron_expression: data.cron,
-        payload: JSON.parse(data.payload),
-        retry_count: data.retryCount,
-      }),
-    });
+  const onSubmit = async (data: JobFormValues) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jobs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name,
+          cron_expression: data.cron,
+          payload: JSON.parse(data.payload),
+          retry_count: data.retryCount,
+        }),
+      });
 
-    const result = await res.json();
+      if (!res.ok) throw new Error("Failed to create job");
 
-    console.log("Job created:", result);
-  } catch (err) {
-    console.error("Failed to create job", err);
-  }
-};
+      router.push("/jobs"); // ← add
+    } catch (err) {
+      console.error("Failed to create job", err);
+    }
+  };
+
+  // rest of JSX same — no changes needed below
 
   return (
     <motion.div
