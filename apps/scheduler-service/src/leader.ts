@@ -1,13 +1,16 @@
 import redis from "../../../packages/redis/src";
+import { generateId } from "../../../packages/utils/src";
 
 const LOCK_KEY = "scheduler-leader";
 const LOCK_TTL = 15000;
+
+const INSTANCE_ID = generateId();
 
 export async function tryBecomeLeader(): Promise<boolean> {
   const result = await redis.call(
     "SET",
     LOCK_KEY,
-    "true",
+    INSTANCE_ID,
     "NX",
     "PX",
     LOCK_TTL,
@@ -17,5 +20,9 @@ export async function tryBecomeLeader(): Promise<boolean> {
 }
 
 export async function renewLeader() {
-  await redis.pexpire(LOCK_KEY, LOCK_TTL);
+  const currentLeader = await redis.get(LOCK_KEY);
+
+  if (currentLeader === INSTANCE_ID) {
+    await redis.pexpire(LOCK_KEY, LOCK_TTL);
+  }
 }

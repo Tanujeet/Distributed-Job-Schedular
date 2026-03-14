@@ -69,7 +69,6 @@ export async function runScheduler() {
 
       await query("COMMIT");
 
-      // Push to Redis AFTER commit
       for (const payload of queuedExecutions) {
         try {
           await pushToRedis(payload);

@@ -10,14 +10,15 @@ async function processJob(job: any) {
   const { executionId, jobId, payload, retry, timeout } = job;
 
   try {
-    // ✅ Guard: skip if job was paused or deleted after being queued
     const jobCheck = await query(`SELECT status FROM jobs WHERE id=$1`, [
       jobId,
     ]);
 
     if (!jobCheck.rows.length || jobCheck.rows[0].status !== "active") {
       console.log(
-        `⏭️ Skipping execution ${executionId} — job is ${jobCheck.rows[0]?.status ?? "missing"}`,
+        `⏭️ Skipping execution ${executionId} — job is ${
+          jobCheck.rows[0]?.status ?? "missing"
+        }`,
       );
 
       await query(
@@ -80,20 +81,19 @@ async function workerLoop() {
 
   while (true) {
     try {
-      const payload = await redis.rpop("job-queue");
+      // BLOCKING POP (no polling anymore)
+      const result = await redis.brpop("job-queue", 0);
 
-      if (!payload) {
-        await new Promise((r) => setTimeout(r, 1000));
-        continue;
-      }
+      if (!result) continue;
 
+      const payload = result[1];
       const job = JSON.parse(payload);
+
       console.log("📥 Job received:", job.executionId);
 
       await processJob(job);
     } catch (err) {
       console.error("Worker error:", err);
-      await new Promise((r) => setTimeout(r, 1000));
     }
   }
 }
