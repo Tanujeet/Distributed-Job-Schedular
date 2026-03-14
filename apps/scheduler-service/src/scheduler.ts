@@ -84,6 +84,6 @@ export async function runScheduler() {
       console.error("scheduler error", err);
     }
 
-    await sleep(2000);
+    await sleep(15000);
   }
 }
