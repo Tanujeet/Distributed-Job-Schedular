@@ -7,7 +7,9 @@ import { renewLeader } from "./leader";
 async function pushToRedis(payload: any, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
+      const start = Date.now(); // 👈
       await redis.lpush("job-queue", JSON.stringify(payload));
+      console.log(`[METRIC] Redis lpush latency: ${Date.now() - start}ms`); // 👈
       return;
     } catch (err) {
       if (i === retries - 1) throw err;
@@ -22,6 +24,8 @@ export async function runScheduler() {
   while (true) {
     try {
       await query("BEGIN");
+
+      const cycleStart = Date.now(); // 👈
 
       const jobs = await query(`
         SELECT *
@@ -38,9 +42,7 @@ export async function runScheduler() {
         const executionId = generateId();
 
         await query(
-          `INSERT INTO job_executions
-           (id, job_id, status, attempt)
-           VALUES ($1,$2,$3,$4)`,
+          `INSERT INTO job_executions (id, job_id, status, attempt) VALUES ($1,$2,$3,$4)`,
           [executionId, job.id, "queued", 0],
         );
 
@@ -51,12 +53,10 @@ export async function runScheduler() {
 
         const nextRun = interval.next().toDate();
 
-        await query(
-          `UPDATE jobs
-           SET next_run_at=$1
-           WHERE id=$2`,
-          [nextRun, job.id],
-        );
+        await query(`UPDATE jobs SET next_run_at=$1 WHERE id=$2`, [
+          nextRun,
+          job.id,
+        ]);
 
         queuedExecutions.push({
           executionId,
@@ -68,6 +68,11 @@ export async function runScheduler() {
       }
 
       await query("COMMIT");
+
+      const cycleDuration = Date.now() - cycleStart; // 👈
+      console.log(
+        `[METRIC] Scheduler cycle: ${jobs.rows.length} jobs in ${cycleDuration}ms`,
+      ); // 👈
 
       for (const payload of queuedExecutions) {
         try {

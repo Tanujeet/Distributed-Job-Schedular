@@ -5,8 +5,12 @@ async function executeJob(payload: any) {
   console.log("Executing job with payload:", payload);
   await new Promise((r) => setTimeout(r, 2000));
 }
-
+let activeWorkers = 0; // 👈 ADD (file ke top pe)
+let totalCompleted = 0; // 👈 ADD
+let batchStart = Date.now();
 async function processJob(job: any) {
+  activeWorkers++; // 👈 ADD
+  console.log(`[METRIC] Active workers: ${activeWorkers}/5`);
   const { executionId, jobId, payload, retry, timeout } = job;
 
   try {
@@ -54,6 +58,9 @@ async function processJob(job: any) {
     );
 
     await query(`UPDATE jobs SET last_run_at=NOW() WHERE id=$1`, [jobId]);
+    totalCompleted++; // 👈 ADD
+    const elapsed = Date.now() - batchStart; // 👈 ADD
+    console.log(`[METRIC] Completed: ${totalCompleted} jobs in ${elapsed}ms`);
 
     console.log("✅ Job completed:", executionId);
   } catch (err: any) {
@@ -73,6 +80,8 @@ async function processJob(job: any) {
         JSON.stringify({ ...job, retry: retry - 1 }),
       );
     }
+  } finally {
+    activeWorkers--; // 👈 MOVE HERE — har case mein decrement hoga
   }
 }
 
