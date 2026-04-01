@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 const workerId = randomUUID();
 
 async function heartbeat() {
-  await redis.set(
+  await redis.hset(
     `worker:${workerId}`,
     JSON.stringify({
       id: workerId,
