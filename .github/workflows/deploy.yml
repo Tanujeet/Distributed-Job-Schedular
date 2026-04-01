@@ -1,0 +1,95 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: distcronregistry.azurecr.io
+  RESOURCE_GROUP: distributed-cron-rg
+  ENVIRONMENT: distributed-cron-env
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: distcronregistry.azurecr.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and Push api-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/api-service/Dockerfile
+          push: true
+          tags: distcronregistry.azurecr.io/api-service:latest
+
+      - name: Build and Push scheduler-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/scheduler-service/Dockerfile
+          push: true
+          tags: distcronregistry.azurecr.io/scheduler-service:latest
+
+      - name: Build and Push worker-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/worker-service/Dockerfile
+          push: true
+          tags: distcronregistry.azurecr.io/worker-service:latest
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy api-service
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          containerAppName: api-service
+          resourceGroup: distributed-cron-rg
+          imageToDeploy: distcronregistry.azurecr.io/api-service:latest
+          registryUrl: distcronregistry.azurecr.io
+          registryUsername: ${{ secrets.REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
+          targetPort: 4000
+          ingress: external
+          environmentVariables: DATABASE_URL=${{ secrets.DATABASE_URL }} REDIS_URL=${{ secrets.REDIS_URL }} PORT=4000
+          containerAppEnvironment: distributed-cron-env
+
+      - name: Deploy scheduler-service
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          containerAppName: scheduler-service
+          resourceGroup: distributed-cron-rg
+          imageToDeploy: distcronregistry.azurecr.io/scheduler-service:latest
+          registryUrl: distcronregistry.azurecr.io
+          registryUsername: ${{ secrets.REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
+          ingress: internal
+          environmentVariables: DATABASE_URL=${{ secrets.DATABASE_URL }} REDIS_URL=${{ secrets.REDIS_URL }}
+          containerAppEnvironment: distributed-cron-env
+
+      - name: Deploy worker-service
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          containerAppName: worker-service
+          resourceGroup: distributed-cron-rg
+          imageToDeploy: distcronregistry.azurecr.io/worker-service:latest
+          registryUrl: distcronregistry.azurecr.io
+          registryUsername: ${{ secrets.REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
+          ingress: internal
+          environmentVariables: DATABASE_URL=${{ secrets.DATABASE_URL }} REDIS_URL=${{ secrets.REDIS_URL }}
+          containerAppEnvironment: distributed-cron-env
