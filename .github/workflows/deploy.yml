@@ -51,58 +51,70 @@ jobs:
 
       - name: Deploy api-service
         run: |
-          az containerapp create \
-            --name api-service \
-            --resource-group distributed-cron-rg \
-            --environment distributed-cron-env \
-            --image distcronregistry.azurecr.io/api-service:latest \
-            --registry-server distcronregistry.azurecr.io \
-            --registry-username ${{ secrets.REGISTRY_USERNAME }} \
-            --registry-password ${{ secrets.REGISTRY_PASSWORD }} \
-            --target-port 4000 \
-            --ingress external \
-            --min-replicas 1 \
-            --env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} REDIS_URL=${{ secrets.REDIS_URL }} PORT=4000 \
-            || az containerapp update \
-            --name api-service \
-            --resource-group distributed-cron-rg \
-            --image distcronregistry.azurecr.io/api-service:latest \
-            --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} REDIS_URL=${{ secrets.REDIS_URL }} PORT=4000
+          EXISTS=$(az containerapp show --name api-service --resource-group distributed-cron-rg --query "name" -o tsv 2>/dev/null || echo "")
+          if [ -z "$EXISTS" ]; then
+            az containerapp create \
+              --name api-service \
+              --resource-group distributed-cron-rg \
+              --environment distributed-cron-env \
+              --image distcronregistry.azurecr.io/api-service:latest \
+              --registry-server distcronregistry.azurecr.io \
+              --registry-username ${{ secrets.REGISTRY_USERNAME }} \
+              --registry-password "${{ secrets.REGISTRY_PASSWORD }}" \
+              --target-port 4000 \
+              --ingress external \
+              --min-replicas 1 \
+              --env-vars DATABASE_URL="${{ secrets.DATABASE_URL }}" REDIS_URL="${{ secrets.REDIS_URL }}" PORT=4000
+          else
+            az containerapp update \
+              --name api-service \
+              --resource-group distributed-cron-rg \
+              --image distcronregistry.azurecr.io/api-service:latest \
+              --set-env-vars DATABASE_URL="${{ secrets.DATABASE_URL }}" REDIS_URL="${{ secrets.REDIS_URL }}" PORT=4000
+          fi
 
       - name: Deploy scheduler-service
         run: |
-          az containerapp create \
-            --name scheduler-service \
-            --resource-group distributed-cron-rg \
-            --environment distributed-cron-env \
-            --image distcronregistry.azurecr.io/scheduler-service:latest \
-            --registry-server distcronregistry.azurecr.io \
-            --registry-username ${{ secrets.REGISTRY_USERNAME }} \
-            --registry-password ${{ secrets.REGISTRY_PASSWORD }} \
-            --ingress none \
-            --min-replicas 1 \
-            --env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} REDIS_URL=${{ secrets.REDIS_URL }} \
-            || az containerapp update \
-            --name scheduler-service \
-            --resource-group distributed-cron-rg \
-            --image distcronregistry.azurecr.io/scheduler-service:latest \
-            --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} REDIS_URL=${{ secrets.REDIS_URL }}
+          EXISTS=$(az containerapp show --name scheduler-service --resource-group distributed-cron-rg --query "name" -o tsv 2>/dev/null || echo "")
+          if [ -z "$EXISTS" ]; then
+            az containerapp create \
+              --name scheduler-service \
+              --resource-group distributed-cron-rg \
+              --environment distributed-cron-env \
+              --image distcronregistry.azurecr.io/scheduler-service:latest \
+              --registry-server distcronregistry.azurecr.io \
+              --registry-username ${{ secrets.REGISTRY_USERNAME }} \
+              --registry-password "${{ secrets.REGISTRY_PASSWORD }}" \
+              --ingress none \
+              --min-replicas 1 \
+              --env-vars DATABASE_URL="${{ secrets.DATABASE_URL }}" REDIS_URL="${{ secrets.REDIS_URL }}"
+          else
+            az containerapp update \
+              --name scheduler-service \
+              --resource-group distributed-cron-rg \
+              --image distcronregistry.azurecr.io/scheduler-service:latest \
+              --set-env-vars DATABASE_URL="${{ secrets.DATABASE_URL }}" REDIS_URL="${{ secrets.REDIS_URL }}"
+          fi
 
       - name: Deploy worker-service
         run: |
-          az containerapp create \
-            --name worker-service \
-            --resource-group distributed-cron-rg \
-            --environment distributed-cron-env \
-            --image distcronregistry.azurecr.io/worker-service:latest \
-            --registry-server distcronregistry.azurecr.io \
-            --registry-username ${{ secrets.REGISTRY_USERNAME }} \
-            --registry-password ${{ secrets.REGISTRY_PASSWORD }} \
-            --ingress none \
-            --min-replicas 1 \
-            --env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} REDIS_URL=${{ secrets.REDIS_URL }} \
-            || az containerapp update \
-            --name worker-service \
-            --resource-group distributed-cron-rg \
-            --image distcronregistry.azurecr.io/worker-service:latest \
-            --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} REDIS_URL=${{ secrets.REDIS_URL }}
+          EXISTS=$(az containerapp show --name worker-service --resource-group distributed-cron-rg --query "name" -o tsv 2>/dev/null || echo "")
+          if [ -z "$EXISTS" ]; then
+            az containerapp create \
+              --name worker-service \
+              --resource-group distributed-cron-rg \
+              --environment distributed-cron-env \
+              --image distcronregistry.azurecr.io/worker-service:latest \
+              --registry-server distcronregistry.azurecr.io \
+              --registry-username ${{ secrets.REGISTRY_USERNAME }} \
+              --registry-password "${{ secrets.REGISTRY_PASSWORD }}" \
+              --ingress none \
+              --min-replicas 1 \
+              --env-vars DATABASE_URL="${{ secrets.DATABASE_URL }}" REDIS_URL="${{ secrets.REDIS_URL }}"
+          else
+            az containerapp update \
+              --name worker-service \
+              --resource-group distributed-cron-rg \
+              --image distcronregistry.azurecr.io/worker-service:latest \
+              --set-env-vars DATABASE_URL="${{ secrets.DATABASE_URL }}" REDIS_URL="${{ secrets.REDIS_URL }}"
+          fi
