@@ -5,16 +5,13 @@ import { randomUUID } from "crypto";
 const workerId = randomUUID();
 
 async function heartbeat() {
-  await redis.hset(
-    `worker:${workerId}`,
-    JSON.stringify({
-      id: workerId,
-      status: "online",
-      lastSeen: Date.now(),
-    }),
-    "EX",
-    10,
-  );
+  await redis.hset(`worker:${workerId}`, {
+    id: workerId,
+    status: "online",
+    jobsExecuting: "0",
+    uptime: Date.now().toString(),
+  });
+  await redis.expire(`worker:${workerId}`, 10);
 }
 
 async function main() {
