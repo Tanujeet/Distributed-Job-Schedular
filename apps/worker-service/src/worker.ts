@@ -1,5 +1,5 @@
-import redis from "../../../packages/redis/src";
-import { query } from "../../../packages/database/src";
+import redis from "@repo/redis";
+import { query } from "@repo/database";
 
 async function executeJob(payload: any) {
   console.log("Executing job with payload:", payload);
