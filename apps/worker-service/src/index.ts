@@ -1,5 +1,5 @@
 import { startWorkerPool } from "./worker";
-import redis from "../../../packages/redis/src";
+import redis from "@repo/redis";
 import { randomUUID } from "crypto";
 
 const workerId = randomUUID();
