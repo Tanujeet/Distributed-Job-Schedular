@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { generateId } from "../../../../packages/utils/src";
-import { query } from "../../../../packages/database/src";
+import { generateId } from "@repo/utils";
+import { query } from "@repo/database";
 import { parseExpression } from "cron-parser";
 
 export const createJob = async (req: Request, res: Response) => {

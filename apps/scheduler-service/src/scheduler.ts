@@ -1,7 +1,7 @@
-import { query } from "../../../packages/database/src";
+import { query } from "@repo/database";
 import { parseExpression } from "cron-parser";
-import redis from "../../../packages/redis/src";
-import { generateId, sleep } from "../../../packages/utils/src";
+import redis from "@repo/redis";
+import { generateId, sleep } from "@repo/utils";
 import { renewLeader } from "./leader";
 
 async function pushToRedis(payload: any, retries = 3) {

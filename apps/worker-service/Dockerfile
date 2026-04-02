@@ -3,23 +3,20 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install deps
+# Install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
 
 # Copy full monorepo
 COPY . .
 
-# Build packages first
+# Build order matters (dependencies first)
 RUN npx tsc -p packages/redis
 RUN npx tsc -p packages/database
+RUN npx tsc -p packages/utils
 
-# Install local packages so Node can resolve them
-RUN npm install ./packages/redis
-RUN npm install ./packages/database
-
-# Build scheduler service
-RUN npx tsc -p apps/scheduler-service
+# Build worker
+RUN npx tsc -p apps/worker-service
 
 
 # ---------- RUNNER ----------
@@ -27,10 +24,15 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Copy only needed files
-COPY --from=builder /app ./
-
 ENV NODE_ENV=production
 
-# Run compiled JS (NOT TS)
-CMD ["node", "apps/scheduler-service/dist/index.js"]
+# Install only production deps
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+# Copy ONLY required build output + packages
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/worker-service/dist ./apps/worker-service/dist
+
+# Run compiled JS
+CMD ["node", "apps/worker-service/dist/index.js"]

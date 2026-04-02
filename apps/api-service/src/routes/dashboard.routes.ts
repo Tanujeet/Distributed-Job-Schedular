@@ -1,6 +1,6 @@
 import { Router } from "express";
-import pool from "../../../../packages/database/src/index";
-import redis from "../../../../packages/redis/src";
+import pool from "@repo/database";
+import redis from "@repo/redis";
 
 type JobRow = {
   id: string;
