@@ -8,10 +8,7 @@ COPY apps/worker-service/ ./apps/worker-service/
 
 RUN npm install
 
-# 🔥 build worker
-RUN npx tsc -p apps/worker-service
-
-# =====================
+RUN npx tsc -p apps/worker-service/tsconfig.json
 
 FROM node:20-alpine
 
@@ -21,5 +18,4 @@ COPY --from=builder /app ./
 
 ENV NODE_ENV=production
 
-# ✅ run compiled JS
 CMD ["node", "apps/worker-service/dist/index.js"]
