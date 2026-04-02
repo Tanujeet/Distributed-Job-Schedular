@@ -1,13 +1,18 @@
 {
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "target": "ES2020",
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": ".",
-    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "@repo/redis": ["../../packages/redis/dist"],
+      "@repo/database": ["../../packages/database/dist"],
+      "@repo/utils": ["../../packages/utils/dist"]
+    },
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
+    "skipLibCheck": true
   },
   "include": ["src/**/*"]
 }
