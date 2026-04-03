@@ -1,0 +1,16 @@
+{
+  "name": "scheduler-service",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "cron-parser": "^4.9.0",
+    "dotenv": "^17.0.0",
+    "@repo/database": "*",
+    "@repo/redis": "*",
+    "@repo/utils": "*"
+  }
+}

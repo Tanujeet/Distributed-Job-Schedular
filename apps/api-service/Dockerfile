@@ -1,31 +1,36 @@
+# ---------- builder ----------
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# root files
 COPY package.json package-lock.json ./
+
+# monorepo structure
 COPY packages ./packages
 COPY apps/api-service ./apps/api-service
 
+# install with workspaces
+RUN npm install --workspaces
 
-RUN npm install
+# build ALL packages + service
+RUN npm run build --workspaces
 
-RUN rm -rf apps/api-service/dist
 
-RUN npx tsc -p packages/database \
- && npx tsc -p packages/redis \
- && npx tsc -p packages/utils \
- && npx tsc -p apps/api-service
-
-# second stage
+# ---------- production ----------
 FROM node:20-alpine
 
 WORKDIR /app
 
-COPY --from=builder /app .
-
 ENV NODE_ENV=production
 
-RUN npm prune --omit=dev
+# root files (needed for node resolution)
+COPY package.json package-lock.json ./
+
+# only required runtime things
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/api-service/dist ./apps/api-service/dist
 
 EXPOSE 4000
 

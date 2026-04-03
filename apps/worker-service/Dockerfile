@@ -3,36 +3,35 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies
+# root files
 COPY package.json package-lock.json ./
-RUN npm ci
 
-# Copy full monorepo
-COPY . .
+# monorepo structure
+COPY packages ./packages
+COPY apps/worker-service ./apps/worker-service
 
-# Build order matters (dependencies first)
-RUN npx tsc -p packages/redis
-RUN npx tsc -p packages/database
-RUN npx tsc -p packages/utils
+# install with workspaces
+RUN npm install --workspaces
 
-# Build worker
-RUN npx tsc -p apps/worker-service
+# build all (packages + worker)
+RUN npm run build --workspaces
 
 
 # ---------- RUNNER ----------
-FROM node:20-alpine AS runner
+FROM node:20-alpine
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Install only production deps
+# root files (needed for resolution)
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
 
-# Copy ONLY required build output + packages
+# reuse correct node_modules
+COPY --from=builder /app/node_modules ./node_modules
+
+# runtime code
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/worker-service/dist ./apps/worker-service/dist
 
-# Run compiled JS
 CMD ["node", "apps/worker-service/dist/index.js"]

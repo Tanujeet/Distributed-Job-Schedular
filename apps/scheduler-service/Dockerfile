@@ -3,31 +3,34 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# root files
 COPY package.json package-lock.json ./
-RUN npm ci
 
-COPY . .
+# monorepo structure
+COPY packages ./packages
+COPY apps/scheduler-service ./apps/scheduler-service
 
-# Build dependencies first
-RUN npx tsc -p packages/redis
-RUN npx tsc -p packages/database
-RUN npx tsc -p packages/utils
+# install with workspaces
+RUN npm install --workspaces
 
-# Build scheduler (IMPORTANT)
-RUN npx tsc -p apps/scheduler-service
+# build everything
+RUN npm run build --workspaces
 
 
 # ---------- RUNNER ----------
-FROM node:20-alpine AS runner
+FROM node:20-alpine
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
+# root files (needed for resolution)
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
 
-# copy only required build output
+# copy node_modules from builder (already workspace-linked)
+COPY --from=builder /app/node_modules ./node_modules
+
+# copy runtime code
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/scheduler-service/dist ./apps/scheduler-service/dist
 

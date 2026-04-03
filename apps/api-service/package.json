@@ -1,0 +1,20 @@
+{
+  "name": "api-service",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.0",
+    "pg": "^8.11.0",
+    "ioredis": "^5.3.2",
+    "uuid": "^9.0.0",
+    "@repo/database": "*",
+    "@repo/redis": "*",
+    "@repo/utils": "*"
+  }
+}
