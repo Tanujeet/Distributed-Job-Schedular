@@ -5,11 +5,10 @@ import dashboardRoutes from "./routes/dashboard.routes";
 import jobRoutes from "./routes/jobs";
 import workersRoutes from "./routes/workers.routes";
 
+dotenv.config();
 
 console.log("SERVER BOOTING...");
 console.log("PORT:", process.env.PORT);
-
-dotenv.config();
 
 const app = express();
 

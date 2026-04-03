@@ -138,7 +138,7 @@ export const getExecutions = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   const executions = await query(
-    `SELECT * FROM job_executions WHERE job_id=$1 ORDER BY created_at DESC`,
+    `SELECT * FROM job_executions WHERE job_id=$1 ORDER BY started_at DESC`,
     [id],
   );
 

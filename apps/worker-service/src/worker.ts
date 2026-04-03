@@ -5,11 +5,12 @@ async function executeJob(payload: any) {
   console.log("Executing job with payload:", payload);
   await new Promise((r) => setTimeout(r, 2000));
 }
-let activeWorkers = 0; // 👈 ADD (file ke top pe)
-let totalCompleted = 0; // 👈 ADD
-let batchStart = Date.now();
+let activeWorkers = 0;
+let totalCompleted = 0;
+const batchStart = Date.now();
+
 async function processJob(job: any) {
-  activeWorkers++; // 👈 ADD
+  activeWorkers++;
   console.log(`[METRIC] Active workers: ${activeWorkers}/5`);
   const { executionId, jobId, payload, retry, timeout } = job;
 
@@ -58,8 +59,8 @@ async function processJob(job: any) {
     );
 
     await query(`UPDATE jobs SET last_run_at=NOW() WHERE id=$1`, [jobId]);
-    totalCompleted++; // 👈 ADD
-    const elapsed = Date.now() - batchStart; // 👈 ADD
+    totalCompleted++;
+    const elapsed = Date.now() - batchStart;
     console.log(`[METRIC] Completed: ${totalCompleted} jobs in ${elapsed}ms`);
 
     console.log("✅ Job completed:", executionId);
@@ -81,7 +82,7 @@ async function processJob(job: any) {
       );
     }
   } finally {
-    activeWorkers--; // 👈 MOVE HERE — har case mein decrement hoga
+    activeWorkers--;
   }
 }
 
@@ -90,7 +91,6 @@ async function workerLoop() {
 
   while (true) {
     try {
-      // BLOCKING POP (no polling anymore)
       const result = await redis.brpop("job-queue", 0);
 
       if (!result) continue;

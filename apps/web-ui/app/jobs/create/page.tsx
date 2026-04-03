@@ -130,7 +130,7 @@ export default function CreateJobPage() {
               min="0"
               max="10"
               className="bg-zinc-900 border-zinc-700 focus-visible:ring-emerald-500/50"
-              {...register("retryCount")}
+              {...register("retryCount", { valueAsNumber: true })}
             />
             {errors.retryCount && (
               <p className="text-rose-500 text-sm flex items-center gap-1 mt-1">
