@@ -91,7 +91,7 @@ async function workerLoop() {
 
   while (true) {
     try {
-      const result = await redis.brpop("job-queue", 0);
+      const result = await redis.brpop("job-queue", 30);
 
       if (!result) continue;
 

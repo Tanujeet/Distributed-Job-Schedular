@@ -11,13 +11,13 @@ async function heartbeat() {
     jobsExecuting: "0",
     uptime: Date.now().toString(),
   });
-  await redis.expire(`worker:${workerId}`, 10);
+  await redis.expire(`worker:${workerId}`, 60);
 }
 
 async function main() {
   await heartbeat();
 
-  setInterval(heartbeat, 5000);
+  setInterval(heartbeat, 30000);
 
   startWorkerPool();
 }
