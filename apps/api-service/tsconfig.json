@@ -4,22 +4,19 @@
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./src",
-
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": ["node"],
 
-    // Add these:
+    "ignoreDeprecations": "6.0", // <-- add this
     "baseUrl": ".",
     "paths": {
       "@repo/utils": ["../../packages/utils/src"],
       "@repo/utils/*": ["../../packages/utils/src/*"],
-
       "@repo/database": ["../../packages/database/src"],
       "@repo/database/*": ["../../packages/database/src/*"],
-
       "@repo/redis": ["../../packages/redis/src"],
       "@repo/redis/*": ["../../packages/redis/src/*"]
     }
