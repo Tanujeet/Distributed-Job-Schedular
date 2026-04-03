@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages ./packages
 COPY apps/api-service ./apps/api-service
-COPY tsconfig.json ./
+
 
 RUN npm install
 
