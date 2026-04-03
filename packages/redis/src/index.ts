@@ -17,7 +17,7 @@ redis.on("connect", async () => {
   console.log("🧪 Redis test:", val);
 });
 
-redis.on("error", (err) => {
+redis.on("error", (err: Error) => {
   console.error("❌ Redis error:", err);
 });
 

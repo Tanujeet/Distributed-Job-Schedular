@@ -6,6 +6,10 @@
   "scripts": {
     "build": "tsc"
   },
+  "dependencies": {
+    "ioredis": "^5.10.0",
+    "dotenv": "^17.3.1"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0"
   }
