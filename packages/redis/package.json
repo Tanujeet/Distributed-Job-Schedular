@@ -5,5 +5,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
   }
 }
