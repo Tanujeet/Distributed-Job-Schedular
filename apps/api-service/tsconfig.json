@@ -3,14 +3,13 @@
     "target": "ES2020",
     "module": "commonjs",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "../..",
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": ["node"],
-
-    "ignoreDeprecations": "6.0", // <-- add this
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@repo/utils": ["../../packages/utils/src"],
@@ -21,5 +20,5 @@
       "@repo/redis/*": ["../../packages/redis/src/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "../../packages/*/src/**/*"]
 }
