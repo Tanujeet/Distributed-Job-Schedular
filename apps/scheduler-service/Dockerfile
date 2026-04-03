@@ -13,6 +13,9 @@ COPY apps/scheduler-service ./apps/scheduler-service
 # install with workspaces
 RUN npm install --workspaces
 
+# install typescript globally for build
+RUN npm install -g typescript
+
 # build everything
 RUN npm run build --workspaces
 

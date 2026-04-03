@@ -13,6 +13,9 @@ COPY apps/worker-service ./apps/worker-service
 # install with workspaces
 RUN npm install --workspaces
 
+# install typescript globally for build
+RUN npm install -g typescript
+
 # build all (packages + worker)
 RUN npm run build --workspaces
 

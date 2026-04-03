@@ -13,6 +13,9 @@ COPY apps/api-service ./apps/api-service
 # install with workspaces
 RUN npm install --workspaces
 
+# install typescript globally for build
+RUN npm install -g typescript
+
 # build ALL packages + service
 RUN npm run build --workspaces
 
