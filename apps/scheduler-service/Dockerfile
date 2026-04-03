@@ -37,4 +37,4 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/scheduler-service/dist ./apps/scheduler-service/dist
 
-CMD ["node", "apps/scheduler-service/dist/index.js"]
+CMD ["node", "apps/scheduler-service/dist/apps/scheduler-service/src/index.js"]

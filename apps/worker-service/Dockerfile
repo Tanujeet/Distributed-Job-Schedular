@@ -37,4 +37,4 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/worker-service/dist ./apps/worker-service/dist
 
-CMD ["node", "apps/worker-service/dist/index.js"]
+CMD ["node", "apps/worker-service/dist/apps/worker-service/src/index.js"]
