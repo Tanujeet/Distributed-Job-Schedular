@@ -34,14 +34,13 @@ router.get("/", async (req, res) => {
 
     const workersRaw = await Promise.all(
       workerKeys.map(async (key) => {
-        const raw = await redis.get(key);
-        if (!raw) return null;
-        const data = JSON.parse(raw);
+        const data = await redis.hgetall(key);
+        if (!data || !data.id) return null;
         return {
           id: data.id,
           status: data.status,
-          jobsExecuting: 0,
-          uptime: data.lastSeen,
+          jobsExecuting: Number(data.jobsExecuting || 0),
+          uptime: data.uptime,
         };
       }),
     );
