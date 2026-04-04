@@ -18,7 +18,7 @@ app.use(express.json());
 app.use("/jobs", jobRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/workers", workersRoutes);
-
+app.get("/health", (_, res) => res.json({ status: "ok" }));
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
